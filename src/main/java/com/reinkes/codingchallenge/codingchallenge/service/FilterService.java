@@ -1,14 +1,17 @@
 package com.reinkes.codingchallenge.codingchallenge.service;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
-import com.reinkes.codingchallenge.codingchallenge.domain.Navigation;
-import com.reinkes.codingchallenge.codingchallenge.domain.Node;
-import com.reinkes.codingchallenge.codingchallenge.domain.result.ResultVO;
+import com.reinkes.codingchallenge.codingchallenge.domain.input.Navigation;
+import com.reinkes.codingchallenge.codingchallenge.domain.input.Node;
+import com.reinkes.codingchallenge.codingchallenge.service.vo.FilteredLinkVO;
 
 @Component
 public class FilterService {
@@ -16,31 +19,42 @@ public class FilterService {
 	@Autowired
 	private ApiService apiService;
 
-	public ArrayList<ResultVO> findLinks() {
+	public ArrayList<FilteredLinkVO> findLinks(Optional<String> parent) {
 		Optional<Navigation> res = apiService.fetchDataFromAPI();
-		return filterForURL(res.get(), "link");
+		// TODO: "link" => Enum?
+		return filterForURL(res.get(), "link", parent);
 	}
 
-	private ArrayList<ResultVO> filterForURL(Navigation navigation, String type) {
-		ArrayList<ResultVO> results = new ArrayList<ResultVO>();
+	private ArrayList<FilteredLinkVO> filterForURL(Navigation navigation, String type, Optional<String> parent) {
+		ArrayList<FilteredLinkVO> results = new ArrayList<>();
 		if (!navigation.getNavigationEntries().isEmpty()) {
 			for (Node node : navigation.getNavigationEntries()) {
-				filterNodes(results, type, node, "");
+				filterNodes(results, type, node, new LinkedList<String>(), parent);
 			}
 		}
 		return results;
 	}
 
-	private void filterNodes(ArrayList<ResultVO> results, String type, Node node, String breadcrumb) {
+	@SuppressWarnings("unchecked")
+	private void filterNodes(ArrayList<FilteredLinkVO> results, String type, Node node, LinkedList<String> path,
+			Optional<String> parent) {
 		if (node != null && !type.equals(node.getType()) && node.getChildren() != null
 				&& !node.getChildren().isEmpty()) {
-			breadcrumb = !breadcrumb.isEmpty() ? breadcrumb + " - " + node.getLabel() : breadcrumb + node.getLabel();
+
+			path.add(node.getLabel());
 			for (Node n : node.getChildren()) {
-				filterNodes(results, type, n, breadcrumb);
+				filterNodes(results, type, n, path, parent);
 			}
+			path.removeLast();
 		} else {
-			results.add(new ResultVO(breadcrumb, node.getUrl()));
+			if (!parent.isPresent() || pathContainsParent(path, parent)) {
+				results.add(new FilteredLinkVO((LinkedList<String>) path.clone(), node.getUrl()));
+			}
 		}
+	}
+
+	private boolean pathContainsParent(LinkedList<String> path, Optional<String> parent) {
+		return path.stream().filter(Objects::nonNull).filter(p -> p.equals(parent.get())).count() > 0;
 	}
 
 }

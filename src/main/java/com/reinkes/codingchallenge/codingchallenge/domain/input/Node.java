@@ -1,4 +1,4 @@
-package com.reinkes.codingchallenge.codingchallenge.domain;
+package com.reinkes.codingchallenge.codingchallenge.domain.input;
 
 import java.util.ArrayList;
 

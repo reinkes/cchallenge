@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.reinkes.codingchallenge.codingchallenge.domain.Navigation;
+import com.reinkes.codingchallenge.codingchallenge.domain.input.Navigation;
 
 import ch.qos.logback.classic.Logger;
 

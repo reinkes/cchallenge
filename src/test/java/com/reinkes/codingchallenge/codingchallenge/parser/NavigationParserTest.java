@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.reinkes.codingchallenge.codingchallenge.domain.Navigation;
-import com.reinkes.codingchallenge.codingchallenge.domain.Node;
+import com.reinkes.codingchallenge.codingchallenge.domain.input.Navigation;
+import com.reinkes.codingchallenge.codingchallenge.domain.input.Node;
 
 public class NavigationParserTest {
 

@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.2.1.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.8.RELEASE'
 	id 'java'
+	id 'jacoco'
 }
 
 group = 'com.reinkes.codingchallenge'
@@ -14,8 +15,12 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework:spring-web'
 	implementation 'ch.qos.logback:logback-classic:1.2.3'
-	implementation 'com.fasterxml.jackson.core:jackson-core:2.10.0'
+	
+	// swagger integration
+	implementation 'io.springfox:springfox-swagger2:2.9.2'
+	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 	
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -26,4 +31,14 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+}
+
+jacoco {
+	toolVersion = "0.8.1"
+}
+
+ext {
+	jacocoDestinationFile = "${buildDir}/jacoco/test.exec"
+	jacocoExclusions = ['**/Main*']
+	junitDestinationFile = "${buildDir}/test-results/test/"
 }

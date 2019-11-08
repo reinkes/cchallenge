@@ -1,4 +1,4 @@
-package com.reinkes.codingchallenge.codingchallenge.domain.result;
+package com.reinkes.codingchallenge.codingchallenge.domain.output;
 
 public class ResultVO {
 
