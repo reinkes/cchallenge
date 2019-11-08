@@ -5,7 +5,6 @@ import java.net.URLDecoder;
 import java.util.Optional;
 
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import ch.qos.logback.classic.Logger;
 
@@ -13,19 +12,25 @@ public class ParentTransformer {
 
 	private static final Logger logger = (Logger) LoggerFactory.getLogger(ParentTransformer.class);
 	
-	public Optional<String> transform(String parent) {
-		return urlDecode(parent);
+	private Optional<String> parent;
+	
+	public ParentTransformer(Optional<String> parent) {
+		this.parent = parent;
 	}
 
-	private Optional<String> urlDecode(String parent) {
+	public Optional<String> transform() {
+		return urlDecode(this.parent);
+	}
+
+	private Optional<String> urlDecode(Optional<String> parent) {
 		try {
-			if(StringUtils.isEmpty(parent)) {
-				return Optional.empty();
+			if(!parent.isPresent()) {
+				return parent;
 			}
 			
-			parent = URLDecoder.decode(parent, "UTF-8");
-			logger.debug("URL decode of parent: " + parent);
-			return Optional.of(parent);
+			String decodedParent = URLDecoder.decode(parent.get(), "UTF-8");
+			logger.debug("URL decode of parent: " + decodedParent);
+			return Optional.of(decodedParent);
 		} catch (UnsupportedEncodingException e) {
 			logger.debug("Exception in URLDecode thrown: " + e.getMessage());
 		}
