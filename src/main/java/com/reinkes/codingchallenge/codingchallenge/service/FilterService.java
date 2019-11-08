@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import com.reinkes.codingchallenge.codingchallenge.domain.input.Navigation;
 import com.reinkes.codingchallenge.codingchallenge.domain.input.Node;
 import com.reinkes.codingchallenge.codingchallenge.service.vo.FilteredLinkVO;
+import com.reinkes.codingchallenge.codingchallenge.transformer.SortVO;
 
 @Component
 public class FilterService {
@@ -19,10 +20,18 @@ public class FilterService {
 	@Autowired
 	private ApiService apiService;
 
-	public ArrayList<FilteredLinkVO> findLinks(Optional<String> parent) {
-		Optional<Navigation> res = apiService.fetchDataFromAPI();
+	public ArrayList<FilteredLinkVO> findLinks(Optional<String> parent, Optional<LinkedList<SortVO>> sortingKeys) {
+		Optional<Navigation> navigationData = apiService.fetchDataFromAPI();
 		// TODO: "link" => Enum?
-		return filterForURL(res.get(), "link", parent);
+		ArrayList<FilteredLinkVO> allLinks = filterForURL(navigationData.get(), "link", parent);
+		
+		return sortLinks(allLinks, sortingKeys);
+	}
+
+	private ArrayList<FilteredLinkVO> sortLinks(ArrayList<FilteredLinkVO> allLinks,
+			Optional<LinkedList<SortVO>> sortingKeys) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private ArrayList<FilteredLinkVO> filterForURL(Navigation navigation, String type, Optional<String> parent) {

@@ -1,6 +1,8 @@
 package com.reinkes.codingchallenge.codingchallenge.transformer;
 
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.util.StringUtils;
@@ -9,23 +11,29 @@ public class SortingTransformer {
 
 	private Optional<String> sorting;
 	private String defaultSortingDirection;
+	private List<String> validKeys;
 
-	public SortingTransformer(Optional<String> sorting, String defaultSortingDirection) {
+	public SortingTransformer(Optional<String> sorting, String defaultSortingDirection, String[] validKeys) {
 		this.sorting = sorting;
 		this.defaultSortingDirection = defaultSortingDirection;
+		this.validKeys = Arrays.asList(validKeys);
 	}
 
 	public Optional<LinkedList<SortVO>> transform() {
 		if (this.sorting.isPresent()) {
-			String[] sortKeys = this.sorting.orElse("").split(",");
+			String[] allKeys = this.sorting.orElse("").split(",");
 			LinkedList<SortVO> sortVOs = new LinkedList<>();
-			for (String key : sortKeys) {
-				String[] keyAndDirection = key.split(":");
-				String direction = this.defaultSortingDirection;
-				if (keyAndDirection.length > 1 && !StringUtils.isEmpty(keyAndDirection[1])) {
-					direction = keyAndDirection[1];
+			for (String singleKeyWithDirection : allKeys) {
+				String[] singleKeyAndDirection = singleKeyWithDirection.split(":");
+				String key = singleKeyAndDirection[0];
+				if(!validKeys.contains(key)) {
+					continue;
 				}
-				sortVOs.add(new SortVO(keyAndDirection[0], direction));
+				String direction = this.defaultSortingDirection;
+				if (singleKeyAndDirection.length > 1 && !StringUtils.isEmpty(singleKeyAndDirection[1])) {
+					direction = singleKeyAndDirection[1];
+				}
+				sortVOs.add(new SortVO(key, direction));
 			}
 			return Optional.of(sortVOs);
 		}

@@ -13,46 +13,58 @@ import com.reinkes.codingchallenge.codingchallenge.transformer.SortingTransforme
 
 public class SortTransformerTest {
 
+	private String[] validKeys = new String[] { "url", "label", "testkey" };
+
 	@Test
 	public void testSuccessEmpty() {
-		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.empty(), "default").transform();
+		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.empty(), "default", validKeys)
+				.transform();
 		assertEquals(false, result.isPresent());
 	}
 	
 	@Test
+	public void testInvalidKey() {
+		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.empty(), "invalidKey", validKeys)
+				.transform();
+		assertEquals(false, result.isPresent());
+	}
+
+	@Test
 	public void testSuccessSingleEntry() {
-		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.of("key1"), "asc").transform();
-		
+		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.of("label"), "asc", validKeys).transform();
+
 		assertTrue(result.isPresent());
 		assertEquals(1, result.get().size());
-		assertEquals("key1", result.get().get(0).getKey());
+		assertEquals("label", result.get().get(0).getKey());
 		assertEquals("asc", result.get().get(0).getDirection());
 	}
-	
+
 	@Test
 	public void testSuccessWithoutDirection() {
-		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.of("key1,key2"), "asc").transform();
-		
+		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.of("label,url"), "asc", validKeys)
+				.transform();
+
 		assertTrue(result.isPresent());
 		assertEquals(2, result.get().size());
-		assertEquals("key1", result.get().get(0).getKey());
+		assertEquals("label", result.get().get(0).getKey());
 		assertEquals("asc", result.get().get(0).getDirection());
-		assertEquals("key2", result.get().get(1).getKey());
+		assertEquals("url", result.get().get(1).getKey());
 		assertEquals("asc", result.get().get(1).getDirection());
 	}
-	
+
 	@Test
 	public void testSuccessWithURLEncode() {
-		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.of("key1,key2:desc,key3:asc"), "desc").transform();
+		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.of("label,url:desc,testkey:asc"), "desc",
+				validKeys).transform();
 
 		assertTrue(result.isPresent());
 		assertEquals(3, result.get().size());
-		assertEquals("key1", result.get().get(0).getKey());
+		assertEquals("label", result.get().get(0).getKey());
 		assertEquals("desc", result.get().get(0).getDirection());
-		assertEquals("key2", result.get().get(1).getKey());
+		assertEquals("url", result.get().get(1).getKey());
 		assertEquals("desc", result.get().get(1).getDirection());
-		assertEquals("key3", result.get().get(2).getKey());
+		assertEquals("testkey", result.get().get(2).getKey());
 		assertEquals("asc", result.get().get(2).getDirection());
 	}
-	
+
 }

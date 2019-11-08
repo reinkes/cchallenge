@@ -40,18 +40,22 @@ public class FilterAPIController {
 
 	@Autowired
 	FilterService filterService;
-	
+
 	@Value("${default.sort.direction}")
 	String defaultSortDirection;
+
+	@Value("${valid.sort.keys}")
+	String[] validSortKeys;
 
 	@GetMapping("/links")
 	public ResponseEntity<List<ResultVO>> findLinks(@RequestParam(required = false) String parent,
 			@RequestParam(required = false) String sort) throws UnsupportedEncodingException {
 		logger.info("Requesting findLinks with: parent=" + parent);
 		Optional<String> tParent = new ParentTransformer(Optional.ofNullable(parent)).transform();
-		Optional<LinkedList<SortVO>> sortingKeys = new SortingTransformer(Optional.ofNullable(sort), defaultSortDirection).transform();
-		
-		ArrayList<FilteredLinkVO> response = filterService.findLinks(tParent);
+		Optional<LinkedList<SortVO>> sortingKeys = new SortingTransformer(Optional.ofNullable(sort),
+				defaultSortDirection, validSortKeys).transform();
+
+		ArrayList<FilteredLinkVO> response = filterService.findLinks(tParent, sortingKeys);
 		logger.info("Responding findLinks");
 		return new ResponseEntity<>(response.stream().map(r -> map(r, tParent)).collect(Collectors.toList()),
 				HttpStatus.OK);
