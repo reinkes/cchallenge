@@ -16,14 +16,13 @@ import com.reinkes.codingchallenge.codingchallenge.transformer.SortVO;
 public class SortService {
 
 	@SuppressWarnings("unchecked")
-	public ArrayList<FilteredLinkVO> sortLinks(ArrayList<FilteredLinkVO> links,
+	public Optional<ArrayList<FilteredLinkVO>> sortLinks(Optional<ArrayList<FilteredLinkVO>> links,
 			Optional<LinkedList<SortVO>> sortingKeys) {
 
-		if (sortingKeys.isPresent()) {
-			Collections.sort(links, new FilteredLinkChain(sortingKeys.get().stream()
+		if (links.isPresent() && sortingKeys.isPresent()) {
+			Collections.sort(links.get(), new FilteredLinkChain(sortingKeys.get().stream()
 					.map(sk -> getComparatorBySortKey(sk)).collect(Collectors.toList()).toArray(new Comparator[0])));
 		}
-
 		return links;
 	}
 

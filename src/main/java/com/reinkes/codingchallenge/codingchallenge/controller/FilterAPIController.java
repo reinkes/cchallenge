@@ -41,7 +41,7 @@ public class FilterAPIController {
 
 	@Autowired
 	FilterService filterService;
-	
+
 	@Autowired
 	SortService sortingService;
 
@@ -59,11 +59,15 @@ public class FilterAPIController {
 		Optional<LinkedList<SortVO>> sortingKeys = new SortingTransformer(Optional.ofNullable(sort),
 				defaultSortDirection, validSortKeys).transform();
 
-		ArrayList<FilteredLinkVO> links = sortingService.sortLinks(filterService.findLinks(tParent), sortingKeys);
-		
-		logger.info("Responding findLinks");
-		return new ResponseEntity<>(links.stream().map(r -> map(r, tParent)).collect(Collectors.toList()),
-				HttpStatus.OK);
+		Optional<ArrayList<FilteredLinkVO>> links = sortingService.sortLinks(filterService.findLinks(tParent),
+				sortingKeys);
+
+		if(links.isPresent()) {
+			return new ResponseEntity<>(links.get().stream().map(r -> map(r, tParent)).collect(Collectors.toList()),
+					HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(new ArrayList<ResultVO>(), HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	private ResultVO map(FilteredLinkVO fLinkVO, Optional<String> tParent) {

@@ -19,10 +19,15 @@ public class FilterService {
 	@Autowired
 	private ApiService apiService;
 
-	public ArrayList<FilteredLinkVO> findLinks(Optional<String> parent) {
+	public Optional<ArrayList<FilteredLinkVO>> findLinks(Optional<String> parent) {
 		Optional<Navigation> navigationData = apiService.fetchDataFromAPI();
 		// TODO: "link" => Enum?
-		return filterForURL(navigationData.get(), "link", parent);
+		if(navigationData.isPresent()) {
+			return Optional.of(filterForURL(navigationData.get(), "link", parent));
+		} else {
+			// TODO: throw exception
+			return Optional.empty();
+		}
 	}
 	
 	private ArrayList<FilteredLinkVO> filterForURL(Navigation navigation, String type, Optional<String> parent) {
