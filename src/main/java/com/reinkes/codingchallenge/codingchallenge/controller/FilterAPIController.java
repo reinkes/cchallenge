@@ -18,8 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.reinkes.codingchallenge.codingchallenge.domain.output.ResultVO;
-import com.reinkes.codingchallenge.codingchallenge.service.FilterService;
-import com.reinkes.codingchallenge.codingchallenge.service.vo.FilteredLinkVO;
+import com.reinkes.codingchallenge.codingchallenge.filter.FilterService;
+import com.reinkes.codingchallenge.codingchallenge.filter.vo.FilteredLinkVO;
+import com.reinkes.codingchallenge.codingchallenge.sort.SortService;
 import com.reinkes.codingchallenge.codingchallenge.transformer.ParentTransformer;
 import com.reinkes.codingchallenge.codingchallenge.transformer.SortVO;
 import com.reinkes.codingchallenge.codingchallenge.transformer.SortingTransformer;
@@ -40,6 +41,9 @@ public class FilterAPIController {
 
 	@Autowired
 	FilterService filterService;
+	
+	@Autowired
+	SortService sortingService;
 
 	@Value("${default.sort.direction}")
 	String defaultSortDirection;
@@ -55,9 +59,10 @@ public class FilterAPIController {
 		Optional<LinkedList<SortVO>> sortingKeys = new SortingTransformer(Optional.ofNullable(sort),
 				defaultSortDirection, validSortKeys).transform();
 
-		ArrayList<FilteredLinkVO> response = filterService.findLinks(tParent, sortingKeys);
+		ArrayList<FilteredLinkVO> links = sortingService.sortLinks(filterService.findLinks(tParent), sortingKeys);
+		
 		logger.info("Responding findLinks");
-		return new ResponseEntity<>(response.stream().map(r -> map(r, tParent)).collect(Collectors.toList()),
+		return new ResponseEntity<>(links.stream().map(r -> map(r, tParent)).collect(Collectors.toList()),
 				HttpStatus.OK);
 	}
 

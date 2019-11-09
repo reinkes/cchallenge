@@ -1,23 +1,17 @@
-package com.reinkes.codingchallenge.codingchallenge.service;
+package com.reinkes.codingchallenge.codingchallenge.filter;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import com.reinkes.codingchallenge.codingchallenge.comparator.FilteredLinkChain;
-import com.reinkes.codingchallenge.codingchallenge.comparator.JoinPathComparator;
-import com.reinkes.codingchallenge.codingchallenge.comparator.URLComparator;
+import com.reinkes.codingchallenge.codingchallenge.domain.api.ApiService;
 import com.reinkes.codingchallenge.codingchallenge.domain.input.Navigation;
 import com.reinkes.codingchallenge.codingchallenge.domain.input.Node;
-import com.reinkes.codingchallenge.codingchallenge.service.vo.FilteredLinkVO;
-import com.reinkes.codingchallenge.codingchallenge.transformer.SortVO;
+import com.reinkes.codingchallenge.codingchallenge.filter.vo.FilteredLinkVO;
 
 @Component
 public class FilterService {
@@ -25,40 +19,12 @@ public class FilterService {
 	@Autowired
 	private ApiService apiService;
 
-	public ArrayList<FilteredLinkVO> findLinks(Optional<String> parent, Optional<LinkedList<SortVO>> sortingKeys) {
+	public ArrayList<FilteredLinkVO> findLinks(Optional<String> parent) {
 		Optional<Navigation> navigationData = apiService.fetchDataFromAPI();
 		// TODO: "link" => Enum?
-		ArrayList<FilteredLinkVO> allLinks = filterForURL(navigationData.get(), "link", parent);
-
-		return sortLinks(allLinks, sortingKeys);
+		return filterForURL(navigationData.get(), "link", parent);
 	}
-
-	private ArrayList<FilteredLinkVO> sortLinks(ArrayList<FilteredLinkVO> allLinks,
-			Optional<LinkedList<SortVO>> sortingKeys) {
-
-		if(sortingKeys.isPresent()) {
-			Comparator<FilteredLinkVO>[] sortComp = new Comparator[sortingKeys.get().size()];
-			LinkedList<SortVO> allKeys = sortingKeys.get();
-			for(int i = 0; i < allKeys.size(); i++) {
-				if(allKeys.get(i).getKey().equals("label")) {
-					sortComp[i] = new JoinPathComparator();
-					if(allKeys.get(i).getDirection().equals("desc")) {
-						sortComp[i] = sortComp[i].reversed();
-					}
-				} else {
-					sortComp[i] = new URLComparator();
-					if(allKeys.get(i).getDirection().equals("desc")) {
-						sortComp[i] = sortComp[i].reversed();
-					}
-				}
-			}
-			Collections.sort(allLinks, new FilteredLinkChain(
-					sortComp));
-		}
-		
-		return allLinks;
-	}
-
+	
 	private ArrayList<FilteredLinkVO> filterForURL(Navigation navigation, String type, Optional<String> parent) {
 		ArrayList<FilteredLinkVO> results = new ArrayList<>();
 		if (!navigation.getNavigationEntries().isEmpty()) {

@@ -1,4 +1,4 @@
-package com.reinkes.codingchallenge.codingchallenge.service;
+package com.reinkes.codingchallenge.codingchallenge.domain.api;
 
 import java.util.Optional;
 

@@ -1,8 +1,8 @@
-package com.reinkes.codingchallenge.codingchallenge.comparator;
+package com.reinkes.codingchallenge.codingchallenge.sort;
 
 import java.util.Comparator;
 
-import com.reinkes.codingchallenge.codingchallenge.service.vo.FilteredLinkVO;
+import com.reinkes.codingchallenge.codingchallenge.filter.vo.FilteredLinkVO;
 
 public class JoinPathComparator implements Comparator<FilteredLinkVO>{
 

@@ -1,10 +1,10 @@
-package com.reinkes.codingchallenge.codingchallenge.comparator;
+package com.reinkes.codingchallenge.codingchallenge.sort;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import com.reinkes.codingchallenge.codingchallenge.service.vo.FilteredLinkVO;
+import com.reinkes.codingchallenge.codingchallenge.filter.vo.FilteredLinkVO;
 
 public class FilteredLinkChain implements Comparator<FilteredLinkVO> {
 	 

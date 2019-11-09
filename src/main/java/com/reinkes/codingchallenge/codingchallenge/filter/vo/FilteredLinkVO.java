@@ -1,4 +1,4 @@
-package com.reinkes.codingchallenge.codingchallenge.service.vo;
+package com.reinkes.codingchallenge.codingchallenge.filter.vo;
 
 import java.util.LinkedList;
 
