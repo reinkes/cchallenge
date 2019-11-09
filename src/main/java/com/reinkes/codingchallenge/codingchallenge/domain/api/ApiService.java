@@ -38,7 +38,7 @@ public class ApiService {
 		try {
 			ResponseEntity<String> response = restTemplate.exchange(apiURL, HttpMethod.GET, buildHttpEntity(),
 					String.class);
-			if (response.getStatusCode() == HttpStatus.OK) {
+			if (response != null && response.getStatusCode() == HttpStatus.OK) {
 				ObjectMapper mapper = new ObjectMapper();
 				Navigation navigation = mapper.readValue(response.getBody(), Navigation.class);
 				return Optional.of(navigation);

@@ -5,6 +5,8 @@ public class ResultVO {
 	private String label;
 	private String url;
 	
+	public ResultVO() {}
+	
 	public ResultVO(String label, String url) {
 		this.url = url;
 		this.label = label;
