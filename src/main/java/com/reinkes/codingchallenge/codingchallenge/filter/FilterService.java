@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,22 +14,30 @@ import com.reinkes.codingchallenge.codingchallenge.domain.input.Navigation;
 import com.reinkes.codingchallenge.codingchallenge.domain.input.Node;
 import com.reinkes.codingchallenge.codingchallenge.domain.input.NodeType;
 import com.reinkes.codingchallenge.codingchallenge.exception.NoResultException;
+import com.reinkes.codingchallenge.codingchallenge.exception.UnexpectedParserException;
 import com.reinkes.codingchallenge.codingchallenge.filter.vo.FilteredLinkVO;
+
+import ch.qos.logback.classic.Logger;
 
 @Component
 public class FilterService {
 
+	private static final Logger logger = (Logger) LoggerFactory.getLogger(FilterService.class);
+
 	@Autowired
 	private ApiService apiService;
 
-	public Optional<ArrayList<FilteredLinkVO>> findLinks(Optional<String> parent) throws NoResultException {
+	public Optional<ArrayList<FilteredLinkVO>> findLinks(Optional<String> parent)
+			throws NoResultException, UnexpectedParserException {
 		Optional<Navigation> navigationData = apiService.fetchDataFromAPI();
 		if (navigationData.isPresent()) {
 			return filterNavigationData(navigationData.get(), parent);
 		} else if (parent.isPresent()) {
-			throw new NoResultException(parent.get());
+			logger.info("Filtering: parent set but no results: " + parent);
+			throw new NoResultException("parent set but no results", parent.get());
 		} else {
-			throw new NoResultException();
+			logger.info("Filtering: no results");
+			throw new NoResultException("no parent set and no results");
 		}
 	}
 

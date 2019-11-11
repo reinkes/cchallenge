@@ -1,13 +1,11 @@
 package com.reinkes.codingchallenge.codingchallenge.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;

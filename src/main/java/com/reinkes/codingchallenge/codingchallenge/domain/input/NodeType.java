@@ -8,5 +8,7 @@ public enum NodeType {
 	@JsonProperty("section")
 	section,
 	@JsonProperty("node")
-	node
+	node,
+	@JsonProperty("external-link")
+	externalLink
 }

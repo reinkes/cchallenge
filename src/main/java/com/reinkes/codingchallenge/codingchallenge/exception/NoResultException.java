@@ -8,11 +8,16 @@ public class NoResultException extends WebServiceException {
 	private static final long serialVersionUID = -6333214585186411828L;
 	private String parent;
 
-	public NoResultException(String parent) {
+	public NoResultException(String message, String parent) {
+		super(message);
 		this.parent = parent;
 	}
 
 	public NoResultException() {
+	}
+
+	public NoResultException(String message) {
+		super(message);
 	}
 
 	@Override

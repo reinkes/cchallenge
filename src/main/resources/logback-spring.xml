@@ -34,11 +34,12 @@
 		</layout>
 	</appender>
 
-	<logger name="com.reinkes" level="debug" additivity="false">
+	<logger name="com.reinkes" level="info" additivity="false">
 		<appender-ref ref="FILE-ROLLING" />
+		<appender-ref ref="Console" />
 	</logger>
 
-	<root level="error">
+	<root level="info">
 		<appender-ref ref="FILE-ROLLING" />
 		<appender-ref ref="Console" />
 	</root>

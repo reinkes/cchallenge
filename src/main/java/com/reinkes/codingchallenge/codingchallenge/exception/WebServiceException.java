@@ -15,6 +15,10 @@ public abstract class WebServiceException extends Exception {
 		super(e);
 	}
 
+	public WebServiceException(String message) {
+		super(message);
+	}
+
 	/**
 	 * HTTP status code returned in case of an exception.
 	 * 

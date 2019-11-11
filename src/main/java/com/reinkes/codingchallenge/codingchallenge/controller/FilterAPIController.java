@@ -57,7 +57,7 @@ public class FilterAPIController {
 	public ResponseEntity<List<ResultVO>> findLinks(@RequestParam(required = false) String parent,
 			@RequestParam(required = false) String sort)
 			throws UnknownSortingKeyException, UnexpectedParserException, NoResultException {
-		logger.info("Requesting findLinks with: parent=" + parent);
+		logger.info("Requesting findLinks with: parent=" + parent + " ;sort=" + sort);
 		Optional<String> tParent = new ParentTransformer().transform(Optional.ofNullable(parent));
 		Optional<LinkedList<SortVO>> sortingKeys = new SortingTransformer(defaultSortDirection, validSortKeys)
 				.transform(Optional.ofNullable(sort));

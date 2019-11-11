@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reinkes.codingchallenge.codingchallenge.domain.input.Navigation;
+import com.reinkes.codingchallenge.codingchallenge.exception.UnexpectedParserException;
 
 import ch.qos.logback.classic.Logger;
 
@@ -34,19 +35,21 @@ public class ApiService {
 
 	private static final Logger logger = (Logger) LoggerFactory.getLogger(ApiService.class);
 	
-	public Optional<Navigation> fetchDataFromAPI() {
+	public Optional<Navigation> fetchDataFromAPI() throws UnexpectedParserException {
 		try {
 			ResponseEntity<String> response = restTemplate.exchange(apiURL, HttpMethod.GET, buildHttpEntity(),
 					String.class);
 			if (response != null && response.getStatusCode() == HttpStatus.OK) {
+				logger.debug(response.getBody());
 				ObjectMapper mapper = new ObjectMapper();
 				Navigation navigation = mapper.readValue(response.getBody(), Navigation.class);
 				return Optional.of(navigation);
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage());
+			throw new UnexpectedParserException(e);
 		}
-		logger.error("Either the API returned an error... ");
+		logger.error("The API returned an error... ");
 		return Optional.empty();
 	}
 
