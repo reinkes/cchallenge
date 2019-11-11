@@ -1,8 +1,13 @@
 package com.reinkes.codingchallenge.codingchallenge.exception;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
+import ch.qos.logback.classic.Logger;
+
 public abstract class WebServiceException extends Exception {
+	
+	private static final Logger logger = (Logger) LoggerFactory.getLogger(WebServiceException.class);
 	
 	/**
 	 * 
@@ -13,10 +18,12 @@ public abstract class WebServiceException extends Exception {
 	
 	public WebServiceException(Exception e) {
 		super(e);
+		logger.info(e.getMessage());
 	}
 
 	public WebServiceException(String message) {
 		super(message);
+		logger.info(message);
 	}
 
 	/**
