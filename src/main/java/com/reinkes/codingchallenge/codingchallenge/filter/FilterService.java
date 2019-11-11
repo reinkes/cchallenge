@@ -34,10 +34,10 @@ public class FilterService {
 			return filterNavigationData(navigationData.get(), parent);
 		} else if (parent.isPresent()) {
 			logger.info("Filtering: parent set but no results: " + parent);
-			throw new NoResultException("parent set but no results", parent.get());
+			throw new NoResultException("No results found for parent: " + parent.get());
 		} else {
 			logger.info("Filtering: no results");
-			throw new NoResultException("no parent set and no results");
+			throw new NoResultException("No parent set and no results");
 		}
 	}
 
@@ -47,7 +47,7 @@ public class FilterService {
 		if (!links.isEmpty()) {
 			return Optional.of(filterForURL(navigation, NodeType.link, parent));
 		} else {
-			throw new NoResultException(parent.get());
+			throw new NoResultException("No results found for parent: " + parent.get());
 		}
 	}
 
@@ -59,7 +59,7 @@ public class FilterService {
 				filterNodes(results, link, node, new LinkedList<String>(), parent);
 			}
 		} else {
-			throw new NoResultException(parent.get());
+			throw new NoResultException("No results found for parent: " + parent.get());
 		}
 		return results;
 	}
@@ -80,7 +80,7 @@ public class FilterService {
 				results.add(new FilteredLinkVO((LinkedList<String>) path.clone(), node.getUrl()));
 			}
 		}
-	}
+	} 
 
 	private boolean pathContainsParent(LinkedList<String> path, Optional<String> parent) {
 		return path.stream().filter(Objects::nonNull).filter(p -> p.equals(parent.get())).count() > 0;

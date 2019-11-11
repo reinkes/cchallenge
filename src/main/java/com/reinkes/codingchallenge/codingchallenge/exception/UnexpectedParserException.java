@@ -10,13 +10,12 @@ public class UnexpectedParserException extends WebServiceException {
 		super(e);
 	}
 
-	@Override
-	public HttpStatus getStatusCode() {
-		return HttpStatus.INTERNAL_SERVER_ERROR;
+	public UnexpectedParserException(String msg) {
+		super(msg);
 	}
 
 	@Override
-	public String getMessage() {
-		return String.format("Unexpected parsing error");
+	public HttpStatus getStatusCode() {
+		return HttpStatus.INTERNAL_SERVER_ERROR;
 	}
 }

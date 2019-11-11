@@ -1,6 +1,7 @@
 package com.reinkes.codingchallenge.codingchallenge.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -58,10 +59,10 @@ public class ControllerTest {
 				.thenReturn(new ResponseEntity<String>("", HttpStatus.OK));
 		MvcResult result = sendRequest(null);
 
-		assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), result.getResponse().getStatus());
 
 		String resultBody = result.getResponse().getContentAsString();
-		assertEquals("No results found", resultBody);
+		assertTrue(resultBody.contains("No content to map due to end-of-input"));
 	}
 
 	@Test

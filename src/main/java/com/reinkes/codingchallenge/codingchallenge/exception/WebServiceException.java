@@ -25,9 +25,5 @@ public abstract class WebServiceException extends Exception {
 	 * @return status code
 	 */
 	public abstract HttpStatus getStatusCode();
-	
-	@Override
-	public abstract String getMessage();
-
 
 }

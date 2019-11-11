@@ -31,7 +31,7 @@ public class SortingTransformer {
 		} catch (UnknownSortingKeyException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new UnexpectedParserException(e);
+			throw new UnexpectedParserException(sorting.get());
 		}
 		return Optional.empty();
 	}
@@ -42,7 +42,7 @@ public class SortingTransformer {
 		for (String singleKeyWithDirection : allKeys) {
 			String[] singleKeyAndDirection = singleKeyWithDirection.split(":");
 			if (!validKeys.contains(singleKeyAndDirection[0])) {
-				throw new UnknownSortingKeyException(singleKeyAndDirection[0]);
+				throw new UnknownSortingKeyException("Unknown sorting key: " + singleKeyAndDirection[0]);
 			}
 
 			SortKey key = SortKey.valueOf(singleKeyAndDirection[0]);
