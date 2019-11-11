@@ -31,7 +31,7 @@ public class SortingTransformer {
 		} catch (UnknownSortingKeyException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new UnexpectedParserException(sorting.get());
+			throw new UnexpectedParserException("Parsing error: " + sorting.get());
 		}
 		return Optional.empty();
 	}
