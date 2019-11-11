@@ -29,17 +29,16 @@ public class SortService {
 	private Comparator<FilteredLinkVO> getComparatorBySortKey(SortVO sortVO) {
 		Comparator<FilteredLinkVO> c = null;
 		switch (sortVO.getKey()) {
-		case "label":
+		case label:
 			c = new JoinPathComparator();
 			break;
-		case "url":
+		case url:
 			c = new URLComparator();
 			break;
 		default:
-			// TODO: better exception
-			throw new RuntimeException("this should not happen!");
+			throw new RuntimeException("This should not happen: SortTransformer shoul check the type");
 		}
-		return "desc".equals(sortVO.getDirection()) ? c.reversed() : c;
+		return SortingDirection.desc == sortVO.getDirection() ? c.reversed() : c;
 	}
 
 	

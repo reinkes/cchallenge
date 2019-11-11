@@ -8,6 +8,10 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import com.reinkes.codingchallenge.codingchallenge.exception.UnexpectedParserException;
+import com.reinkes.codingchallenge.codingchallenge.exception.UnknownSortingKeyException;
+import com.reinkes.codingchallenge.codingchallenge.sort.SortKey;
+import com.reinkes.codingchallenge.codingchallenge.sort.SortingDirection;
 import com.reinkes.codingchallenge.codingchallenge.transformer.SortVO;
 import com.reinkes.codingchallenge.codingchallenge.transformer.SortingTransformer;
 
@@ -16,55 +20,53 @@ public class SortTransformerTest {
 	private String[] validKeys = new String[] { "url", "label", "testkey" };
 
 	@Test
-	public void testSuccessEmpty() {
-		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.empty(), "default", validKeys)
-				.transform();
+	public void testSuccessEmpty() throws UnknownSortingKeyException, UnexpectedParserException {
+		Optional<LinkedList<SortVO>> result = new SortingTransformer("default", validKeys)
+				.transform(Optional.empty());
 		assertEquals(false, result.isPresent());
 	}
 	
 	@Test
-	public void testInvalidKey() {
-		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.empty(), "invalidKey", validKeys)
-				.transform();
+	public void testInvalidKey() throws UnknownSortingKeyException, UnexpectedParserException {
+		Optional<LinkedList<SortVO>> result = new SortingTransformer("invalidKey", validKeys)
+				.transform(Optional.empty());
 		assertEquals(false, result.isPresent());
 	}
 
 	@Test
-	public void testSuccessSingleEntry() {
-		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.of("label"), "asc", validKeys).transform();
+	public void testSuccessSingleEntry() throws UnknownSortingKeyException, UnexpectedParserException {
+		Optional<LinkedList<SortVO>> result = new SortingTransformer("asc", validKeys).transform(Optional.of("label"));
 
 		assertTrue(result.isPresent());
 		assertEquals(1, result.get().size());
-		assertEquals("label", result.get().get(0).getKey());
-		assertEquals("asc", result.get().get(0).getDirection());
+		assertEquals(SortKey.label, result.get().get(0).getKey());
+		assertEquals(SortingDirection.asc, result.get().get(0).getDirection());
 	}
 
 	@Test
-	public void testSuccessWithoutDirection() {
-		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.of("label,url"), "asc", validKeys)
-				.transform();
+	public void testSuccessWithoutDirection() throws UnknownSortingKeyException, UnexpectedParserException {
+		Optional<LinkedList<SortVO>> result = new SortingTransformer("asc", validKeys)
+				.transform(Optional.of("label,url"));
 
 		assertTrue(result.isPresent());
 		assertEquals(2, result.get().size());
-		assertEquals("label", result.get().get(0).getKey());
-		assertEquals("asc", result.get().get(0).getDirection());
-		assertEquals("url", result.get().get(1).getKey());
-		assertEquals("asc", result.get().get(1).getDirection());
+		assertEquals(SortKey.label, result.get().get(0).getKey());
+		assertEquals(SortingDirection.asc, result.get().get(0).getDirection());
+		assertEquals(SortKey.url, result.get().get(1).getKey());
+		assertEquals(SortingDirection.asc, result.get().get(1).getDirection());
 	}
 
 	@Test
-	public void testSuccessWithURLEncode() {
-		Optional<LinkedList<SortVO>> result = new SortingTransformer(Optional.of("label,url:desc,testkey:asc"), "desc",
-				validKeys).transform();
+	public void testSuccessWithURLEncode() throws UnknownSortingKeyException, UnexpectedParserException {
+		Optional<LinkedList<SortVO>> result = new SortingTransformer("desc",
+				validKeys).transform(Optional.of("label:asc,url:desc"));
 
 		assertTrue(result.isPresent());
-		assertEquals(3, result.get().size());
-		assertEquals("label", result.get().get(0).getKey());
-		assertEquals("desc", result.get().get(0).getDirection());
-		assertEquals("url", result.get().get(1).getKey());
-		assertEquals("desc", result.get().get(1).getDirection());
-		assertEquals("testkey", result.get().get(2).getKey());
-		assertEquals("asc", result.get().get(2).getDirection());
+		assertEquals(2, result.get().size());
+		assertEquals(SortKey.label, result.get().get(0).getKey());
+		assertEquals(SortingDirection.asc, result.get().get(0).getDirection());
+		assertEquals(SortKey.url, result.get().get(1).getKey());
+		assertEquals(SortingDirection.desc, result.get().get(1).getDirection());
 	}
 
 }

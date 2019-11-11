@@ -1,28 +1,31 @@
 package com.reinkes.codingchallenge.codingchallenge.transformer;
 
+import com.reinkes.codingchallenge.codingchallenge.sort.SortKey;
+import com.reinkes.codingchallenge.codingchallenge.sort.SortingDirection;
+
 public class SortVO {
 
-	private String key;
-	private String direction;
+	private SortKey key;
+	private SortingDirection direction;
 
-	public SortVO(String key, String direction) {
+	public SortVO(SortKey key, SortingDirection direction) {
 		this.key = key;
 		this.direction = direction;
 	}
 
-	public String getKey() {
+	public SortKey getKey() {
 		return key;
 	}
 	
-	public void setKey(String key) {
+	public void setKey(SortKey key) {
 		this.key = key;
 	}
 	
-	public String getDirection() {
+	public SortingDirection getDirection() {
 		return direction;
 	}
 	
-	public void setDirection(String direction) {
+	public void setDirection(SortingDirection direction) {
 		this.direction = direction;
 	}
 	

@@ -1,6 +1,5 @@
 package com.reinkes.codingchallenge.codingchallenge.controller;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.reinkes.codingchallenge.codingchallenge.domain.output.ResultVO;
+import com.reinkes.codingchallenge.codingchallenge.exception.NoResultException;
+import com.reinkes.codingchallenge.codingchallenge.exception.UnexpectedParserException;
+import com.reinkes.codingchallenge.codingchallenge.exception.UnknownSortingKeyException;
 import com.reinkes.codingchallenge.codingchallenge.filter.FilterService;
 import com.reinkes.codingchallenge.codingchallenge.filter.vo.FilteredLinkVO;
 import com.reinkes.codingchallenge.codingchallenge.sort.SortService;
@@ -53,16 +55,19 @@ public class FilterAPIController {
 
 	@GetMapping("/links")
 	public ResponseEntity<List<ResultVO>> findLinks(@RequestParam(required = false) String parent,
-			@RequestParam(required = false) String sort) throws UnsupportedEncodingException {
+			@RequestParam(required = false) String sort)
+			throws UnknownSortingKeyException, UnexpectedParserException, NoResultException {
 		logger.info("Requesting findLinks with: parent=" + parent);
-		Optional<String> tParent = new ParentTransformer(Optional.ofNullable(parent)).transform();
-		Optional<LinkedList<SortVO>> sortingKeys = new SortingTransformer(Optional.ofNullable(sort),
-				defaultSortDirection, validSortKeys).transform();
+		Optional<String> tParent = new ParentTransformer().transform(Optional.ofNullable(parent));
+		Optional<LinkedList<SortVO>> sortingKeys = new SortingTransformer(defaultSortDirection, validSortKeys)
+				.transform(Optional.ofNullable(sort));
 
-		Optional<ArrayList<FilteredLinkVO>> links = sortingService.sortLinks(filterService.findLinks(tParent),
-				sortingKeys);
+		Optional<ArrayList<FilteredLinkVO>> links = filterService.findLinks(tParent);
+		if (sortingKeys.isPresent()) {
+			links = sortingService.sortLinks(links, sortingKeys);
+		}
 
-		if(links.isPresent()) {
+		if (links.isPresent()) {
 			return new ResponseEntity<>(links.get().stream().map(r -> map(r, tParent)).collect(Collectors.toList()),
 					HttpStatus.OK);
 		} else {

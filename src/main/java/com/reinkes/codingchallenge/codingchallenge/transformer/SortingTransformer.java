@@ -7,37 +7,52 @@ import java.util.Optional;
 
 import org.springframework.util.StringUtils;
 
+import com.reinkes.codingchallenge.codingchallenge.exception.UnexpectedParserException;
+import com.reinkes.codingchallenge.codingchallenge.exception.UnknownSortingKeyException;
+import com.reinkes.codingchallenge.codingchallenge.sort.SortKey;
+import com.reinkes.codingchallenge.codingchallenge.sort.SortingDirection;
+
 public class SortingTransformer {
 
-	private Optional<String> sorting;
 	private String defaultSortingDirection;
 	private List<String> validKeys;
 
-	public SortingTransformer(Optional<String> sorting, String defaultSortingDirection, String[] validKeys) {
-		this.sorting = sorting;
+	public SortingTransformer(String defaultSortingDirection, String[] validKeys) {
 		this.defaultSortingDirection = defaultSortingDirection;
 		this.validKeys = Arrays.asList(validKeys);
 	}
 
-	public Optional<LinkedList<SortVO>> transform() {
-		if (this.sorting.isPresent()) {
-			String[] allKeys = this.sorting.orElse("").split(",");
-			LinkedList<SortVO> sortVOs = new LinkedList<>();
-			for (String singleKeyWithDirection : allKeys) {
-				String[] singleKeyAndDirection = singleKeyWithDirection.split(":");
-				String key = singleKeyAndDirection[0];
-				if(!validKeys.contains(key)) {
-					continue;
-				}
-				String direction = this.defaultSortingDirection;
-				if (singleKeyAndDirection.length > 1 && !StringUtils.isEmpty(singleKeyAndDirection[1])) {
-					direction = singleKeyAndDirection[1];
-				}
-				sortVOs.add(new SortVO(key, direction));
+	public Optional<LinkedList<SortVO>> transform(Optional<String> sorting)
+			throws UnknownSortingKeyException, UnexpectedParserException {
+		try {
+			if (sorting.isPresent()) {
+				return parseSorting(sorting);
 			}
-			return Optional.of(sortVOs);
+		} catch (UnknownSortingKeyException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new UnexpectedParserException(e);
 		}
 		return Optional.empty();
+	}
+
+	private Optional<LinkedList<SortVO>> parseSorting(Optional<String> sorting) throws UnknownSortingKeyException {
+		String[] allKeys = sorting.orElse("").split(",");
+		LinkedList<SortVO> sortVOs = new LinkedList<>();
+		for (String singleKeyWithDirection : allKeys) {
+			String[] singleKeyAndDirection = singleKeyWithDirection.split(":");
+			if (!validKeys.contains(singleKeyAndDirection[0])) {
+				throw new UnknownSortingKeyException(singleKeyAndDirection[0]);
+			}
+
+			SortKey key = SortKey.valueOf(singleKeyAndDirection[0]);
+			SortingDirection direction = SortingDirection.valueOf(this.defaultSortingDirection);
+			if (singleKeyAndDirection.length > 1 && !StringUtils.isEmpty(singleKeyAndDirection[1])) {
+				direction = SortingDirection.valueOf(singleKeyAndDirection[1]);
+			}
+			sortVOs.add(new SortVO(key, direction));
+		}
+		return Optional.of(sortVOs);
 	}
 
 }

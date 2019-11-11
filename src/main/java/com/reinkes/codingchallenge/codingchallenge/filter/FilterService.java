@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import com.reinkes.codingchallenge.codingchallenge.domain.api.ApiService;
 import com.reinkes.codingchallenge.codingchallenge.domain.input.Navigation;
 import com.reinkes.codingchallenge.codingchallenge.domain.input.Node;
+import com.reinkes.codingchallenge.codingchallenge.domain.input.NodeType;
+import com.reinkes.codingchallenge.codingchallenge.exception.NoResultException;
 import com.reinkes.codingchallenge.codingchallenge.filter.vo.FilteredLinkVO;
 
 @Component
@@ -19,36 +21,49 @@ public class FilterService {
 	@Autowired
 	private ApiService apiService;
 
-	public Optional<ArrayList<FilteredLinkVO>> findLinks(Optional<String> parent) {
+	public Optional<ArrayList<FilteredLinkVO>> findLinks(Optional<String> parent) throws NoResultException {
 		Optional<Navigation> navigationData = apiService.fetchDataFromAPI();
-		// TODO: "link" => Enum?
-		if(navigationData.isPresent()) {
-			return Optional.of(filterForURL(navigationData.get(), "link", parent));
+		if (navigationData.isPresent()) {
+			return filterNavigationData(navigationData.get(), parent);
+		} else if (parent.isPresent()) {
+			throw new NoResultException(parent.get());
 		} else {
-			// TODO: throw exception
-			return Optional.empty();
+			throw new NoResultException();
 		}
 	}
-	
-	private ArrayList<FilteredLinkVO> filterForURL(Navigation navigation, String type, Optional<String> parent) {
+
+	private Optional<ArrayList<FilteredLinkVO>> filterNavigationData(Navigation navigation, Optional<String> parent)
+			throws NoResultException {
+		ArrayList<FilteredLinkVO> links = filterForURL(navigation, NodeType.link, parent);
+		if (!links.isEmpty()) {
+			return Optional.of(filterForURL(navigation, NodeType.link, parent));
+		} else {
+			throw new NoResultException(parent.get());
+		}
+	}
+
+	private ArrayList<FilteredLinkVO> filterForURL(Navigation navigation, NodeType link, Optional<String> parent)
+			throws NoResultException {
 		ArrayList<FilteredLinkVO> results = new ArrayList<>();
 		if (!navigation.getNavigationEntries().isEmpty()) {
 			for (Node node : navigation.getNavigationEntries()) {
-				filterNodes(results, type, node, new LinkedList<String>(), parent);
+				filterNodes(results, link, node, new LinkedList<String>(), parent);
 			}
+		} else {
+			throw new NoResultException(parent.get());
 		}
 		return results;
 	}
 
 	@SuppressWarnings("unchecked")
-	private void filterNodes(ArrayList<FilteredLinkVO> results, String type, Node node, LinkedList<String> path,
+	private void filterNodes(ArrayList<FilteredLinkVO> results, NodeType link, Node node, LinkedList<String> path,
 			Optional<String> parent) {
-		if (node != null && !type.equals(node.getType()) && node.getChildren() != null
+		if (node != null && !link.equals(node.getType()) && node.getChildren() != null
 				&& !node.getChildren().isEmpty()) {
 
 			path.add(node.getLabel());
 			for (Node n : node.getChildren()) {
-				filterNodes(results, type, n, path, parent);
+				filterNodes(results, link, n, path, parent);
 			}
 			path.removeLast();
 		} else {

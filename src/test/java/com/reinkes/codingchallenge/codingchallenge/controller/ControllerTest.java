@@ -1,12 +1,10 @@
 package com.reinkes.codingchallenge.codingchallenge.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -51,7 +49,7 @@ public class ControllerTest {
 
 	@MockBean
 	private RestTemplate restTemplate;
-	
+
 	@Autowired
 	private ObjectMapper mapper;
 
@@ -61,12 +59,13 @@ public class ControllerTest {
 				Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
 				.thenReturn(new ResponseEntity<String>("", HttpStatus.OK));
 		MvcResult result = sendRequest(null);
-		
-		ArrayList<ResultVO> resultBody = mapper.readValue(result.getResponse().getContentAsString(), ArrayList.class);
+
 		assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
-		assertTrue(resultBody.isEmpty());
+
+		String resultBody = result.getResponse().getContentAsString();
+		assertEquals("No results found", resultBody);
 	}
-	
+
 	@Test
 	public void testMinimumSuccess() throws Exception {
 		String mockResponse = readFile("simpleResponse.txt");
@@ -74,70 +73,221 @@ public class ControllerTest {
 				Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
 				.thenReturn(new ResponseEntity<String>(mockResponse, HttpStatus.OK));
 		MvcResult result = sendRequest(null);
-		
+
 		ResultVO[] resultBody = mapper.readValue(result.getResponse().getContentAsString(), ResultVO[].class);
 		assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
-		
+
 		assertEquals(5, resultBody.length);
-		
-		assertEquals("Sortiment - Alter - Baby & Kleinkind", resultBody[0].getLabel());
-		assertEquals("http://www.mytoys.de/0-6-months/", resultBody[0].getUrl());
-		
-		assertEquals("Sortiment - Alter - Baby & Kleinkind", resultBody[1].getLabel());
-		assertEquals("http://www.mytoys.de/7-12-months/", resultBody[1].getUrl());
-		
-		assertEquals("Sortiment - Alter - Baby & Kleinkind", resultBody[2].getLabel());
-		assertEquals("http://www.mytoys.de/13-24-months/", resultBody[2].getUrl());
-		
-		assertEquals("Sortiment - Alter - Kindergarten", resultBody[3].getLabel());
-		assertEquals("http://www.mytoys.de/24-47-months/", resultBody[3].getUrl());
-		
-		assertEquals("Sortiment - Alter - Kindergarten", resultBody[4].getLabel());
-		assertEquals("http://www.mytoys.de/48-71-months/", resultBody[4].getUrl());
+
+		String[] expLabels = new String[] { "Sortiment - Alter - Baby & Kleinkind",
+				"Sortiment - Alter - Baby & Kleinkind", "Sortiment - Alter - Baby & Kleinkind",
+				"Sortiment - Alter - Kindergarten", "Sortiment - Alter - Kindergarten" };
+
+		String[] expLinks = new String[] { "http://www.mytoys.de/0-6-months/", "http://www.mytoys.de/7-12-months/",
+				"http://www.mytoys.de/13-24-months/", "http://www.mytoys.de/24-47-months/",
+				"http://www.mytoys.de/48-71-months/" };
+		checkExpectedResultVOs(resultBody, expLabels, expLinks);
 	}
-	
+
 	@Test
 	public void testFilterSuccess() throws Exception {
+		String filter = "Kindergarten";
+
 		String mockResponse = readFile("simpleResponse.txt");
 		Mockito.when(restTemplate.exchange(Mockito.any(String.class), Mockito.any(HttpMethod.class),
 				Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
 				.thenReturn(new ResponseEntity<String>(mockResponse, HttpStatus.OK));
-		MvcResult result = sendRequest("?parent=Kindergarten");
-		
+		MvcResult result = sendRequest("?parent=" + filter);
+
 		ResultVO[] resultBody = mapper.readValue(result.getResponse().getContentAsString(), ResultVO[].class);
 		assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
-		
+
 		assertEquals(2, resultBody.length);
-		
-		assertEquals("Kindergarten", resultBody[0].getLabel());
-		assertEquals("http://www.mytoys.de/24-47-months/", resultBody[0].getUrl());
-		
-		assertEquals("Kindergarten", resultBody[1].getLabel());
-		assertEquals("http://www.mytoys.de/48-71-months/", resultBody[1].getUrl());
+
+		String[] expLinks = new String[] { "http://www.mytoys.de/24-47-months/", "http://www.mytoys.de/48-71-months/" };
+		checkExpectedResultVOs(resultBody, filter, expLinks);
 	}
-	
+
+	@Test
+	public void testFilterExceptionWithoutURLEncode() throws Exception {
+		String mockResponse = readFile("simpleResponse.txt");
+		Mockito.when(restTemplate.exchange(Mockito.any(String.class), Mockito.any(HttpMethod.class),
+				Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+				.thenReturn(new ResponseEntity<String>(mockResponse, HttpStatus.OK));
+		MvcResult result = sendRequest("?parent=Baby & Kleinkind");
+
+		assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
+		String resultBody = result.getResponse().getContentAsString();
+
+		assertEquals("No results found for parent: Baby ", resultBody);
+	}
+
 	@Test
 	public void testFilterSuccessWithURLEncode() throws Exception {
-		fail();
+		String categoryToFilter = "Baby & Kleinkind";
+
+		String mockResponse = readFile("simpleResponse.txt");
+		Mockito.when(restTemplate.exchange(Mockito.any(String.class), Mockito.any(HttpMethod.class),
+				Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+				.thenReturn(new ResponseEntity<String>(mockResponse, HttpStatus.OK));
+		MvcResult result = sendRequest("?parent=" + URLEncoder.encode(categoryToFilter, "UTF-8"));
+
+		ResultVO[] resultBody = mapper.readValue(result.getResponse().getContentAsString(), ResultVO[].class);
+		assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
+
+		assertEquals(3, resultBody.length);
+
+		String[] expLinks = new String[] { "http://www.mytoys.de/0-6-months/", "http://www.mytoys.de/7-12-months/",
+				"http://www.mytoys.de/13-24-months/" };
+		checkExpectedResultVOs(resultBody, categoryToFilter, expLinks);
+	}
+
+	private void checkExpectedResultVOs(ResultVO[] result, String expLabel, String[] expLinks) {
+		checkExpectedResultVOs(result, new String[] { expLabel }, expLinks);
+	}
+
+	private void checkExpectedResultVOs(ResultVO[] result, String[] expLabels, String[] expLinks) {
+		for (int i = 0; i < result.length; i++) {
+			String expLabel = expLabels.length == 1 ? expLabels[0] : expLabels[i];
+			String expLink = expLinks[i];
+
+			assertEquals(expLabel, result[i].getLabel());
+			assertEquals(expLink, result[i].getUrl());
+		}
 	}
 
 	@Test
 	public void testSingleSortSuccess() throws Exception {
-		fail();
+		// sorting with asc
+		String categoryToFilter = "Baby & Kleinkind";
+		String sort = "url:asc";
+
+		String mockResponse = readFile("simpleResponse.txt");
+		Mockito.when(restTemplate.exchange(Mockito.any(String.class), Mockito.any(HttpMethod.class),
+				Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+				.thenReturn(new ResponseEntity<String>(mockResponse, HttpStatus.OK));
+		MvcResult result = sendRequest("?parent=" + URLEncoder.encode(categoryToFilter, "UTF-8") + "&sort=" + sort);
+
+		ResultVO[] resultBody = mapper.readValue(result.getResponse().getContentAsString(), ResultVO[].class);
+		assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
+
+		assertEquals(3, resultBody.length);
+
+		String[] expLinks = new String[] { "http://www.mytoys.de/0-6-months/", "http://www.mytoys.de/13-24-months/",
+				"http://www.mytoys.de/7-12-months/", };
+		checkExpectedResultVOs(resultBody, categoryToFilter, expLinks);
+
+		// sorting with desc
+		sort = "url:desc";
+		result = sendRequest("?parent=" + URLEncoder.encode(categoryToFilter, "UTF-8") + "&sort=" + sort);
+
+		resultBody = mapper.readValue(result.getResponse().getContentAsString(), ResultVO[].class);
+		assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
+
+		assertEquals(3, resultBody.length);
+
+		expLinks = new String[] { "http://www.mytoys.de/7-12-months/", "http://www.mytoys.de/13-24-months/",
+				"http://www.mytoys.de/0-6-months/", };
+		checkExpectedResultVOs(resultBody, categoryToFilter, expLinks);
+	}
+
+	@Test
+	public void testUnknownSortException() throws Exception {
+		// sorting with asc
+		String categoryToFilter = "Baby & Kleinkind";
+		String sort = "test:asc";
+
+		String mockResponse = readFile("simpleResponse.txt");
+		Mockito.when(restTemplate.exchange(Mockito.any(String.class), Mockito.any(HttpMethod.class),
+				Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+				.thenReturn(new ResponseEntity<String>(mockResponse, HttpStatus.OK));
+		MvcResult result = sendRequest("?parent=" + URLEncoder.encode(categoryToFilter, "UTF-8") + "&sort=" + sort);
+
+		assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
+		assertEquals("Unknown sorting key: test", result.getResponse().getContentAsString());
+	}
+	
+	@Test
+	public void testNoResultException() throws Exception {
+		String categoryToFilter = "test";
+
+		String mockResponse = readFile("simpleResponse.txt");
+		Mockito.when(restTemplate.exchange(Mockito.any(String.class), Mockito.any(HttpMethod.class),
+				Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+				.thenReturn(new ResponseEntity<String>(mockResponse, HttpStatus.OK));
+		MvcResult result = sendRequest("?parent=" + URLEncoder.encode(categoryToFilter, "UTF-8"));
+
+		assertEquals(HttpStatus.BAD_REQUEST.value(), result.getResponse().getStatus());
+		assertEquals("No results found for parent: test", result.getResponse().getContentAsString());
 	}
 
 	@Test
 	public void testMultiSortSuccess() throws Exception {
-		fail();
+		// First sorting: label desc and url asc
+		String categoryToFilter = "Sortiment";
+		String sort = "label:desc,url:asc";
+
+		String mockResponse = readFile("simpleResponse.txt");
+		Mockito.when(restTemplate.exchange(Mockito.any(String.class), Mockito.any(HttpMethod.class),
+				Mockito.any(HttpEntity.class), Mockito.any(Class.class)))
+				.thenReturn(new ResponseEntity<String>(mockResponse, HttpStatus.OK));
+		
+		MvcResult result = sendRequest("?parent=" + URLEncoder.encode(categoryToFilter, "UTF-8") + "&sort=" + sort);
+		ResultVO[] resultBody = mapper.readValue(result.getResponse().getContentAsString(), ResultVO[].class);
+		assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
+
+		assertEquals(5, resultBody.length);
+
+		String[] expLabels = new String[] { 
+				"Sortiment - Alter - Kindergarten", 
+				"Sortiment - Alter - Kindergarten", 
+				"Sortiment - Alter - Baby & Kleinkind",
+				"Sortiment - Alter - Baby & Kleinkind", 
+				"Sortiment - Alter - Baby & Kleinkind",
+				};
+
+		String[] expLinks = new String[] { 
+				"http://www.mytoys.de/24-47-months/",
+				"http://www.mytoys.de/48-71-months/", 
+				"http://www.mytoys.de/0-6-months/", 
+				"http://www.mytoys.de/13-24-months/", 
+				"http://www.mytoys.de/7-12-months/",
+				};
+		checkExpectedResultVOs(resultBody, expLabels, expLinks);
+		
+		// First sorting: label asc and url desc
+		sort = "label:asc,url:desc";
+		result = sendRequest("?parent=" + URLEncoder.encode(categoryToFilter, "UTF-8") + "&sort=" + sort);
+		resultBody = mapper.readValue(result.getResponse().getContentAsString(), ResultVO[].class);
+		assertEquals(HttpStatus.OK.value(), result.getResponse().getStatus());
+
+		assertEquals(5, resultBody.length);
+
+		expLabels = new String[] { 
+				"Sortiment - Alter - Baby & Kleinkind",
+				"Sortiment - Alter - Baby & Kleinkind", 
+				"Sortiment - Alter - Baby & Kleinkind",
+				"Sortiment - Alter - Kindergarten", 
+				"Sortiment - Alter - Kindergarten", 
+				};
+
+		expLinks = new String[] { 
+				"http://www.mytoys.de/7-12-months/",
+				"http://www.mytoys.de/13-24-months/", 
+				"http://www.mytoys.de/0-6-months/", 
+				"http://www.mytoys.de/48-71-months/", 
+				"http://www.mytoys.de/24-47-months/",
+				};
+		checkExpectedResultVOs(resultBody, expLabels, expLinks);
 	}
-	
+
 	private MvcResult sendRequest(String suffix) throws Exception {
 		String url = "http://localhost:" + port + "/links" + (!StringUtils.isEmpty(suffix) ? suffix : "");
 		RequestBuilder requestBuilder = MockMvcRequestBuilders.request(HttpMethod.GET, url)
 				.contentType(MediaType.APPLICATION_JSON);
 		return mockMvc.perform(requestBuilder).andReturn();
 	}
-	
+
 	private String readFile(String fileName) throws IOException {
 		return new String(Files.readAllBytes(Paths.get("src/test/resources/" + fileName)));
 	}

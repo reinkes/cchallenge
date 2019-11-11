@@ -11,23 +11,20 @@ import ch.qos.logback.classic.Logger;
 public class ParentTransformer {
 
 	private static final Logger logger = (Logger) LoggerFactory.getLogger(ParentTransformer.class);
-	
-	private Optional<String> parent;
-	
-	public ParentTransformer(Optional<String> parent) {
-		this.parent = parent;
+
+	public ParentTransformer() {
 	}
 
-	public Optional<String> transform() {
-		return urlDecode(this.parent);
+	public Optional<String> transform(Optional<String> parent) {
+		return urlDecode(parent);
 	}
 
 	private Optional<String> urlDecode(Optional<String> parent) {
 		try {
-			if(!parent.isPresent()) {
+			if (!parent.isPresent()) {
 				return parent;
 			}
-			
+
 			String decodedParent = URLDecoder.decode(parent.get(), "UTF-8");
 			logger.debug("URL decode of parent: " + decodedParent);
 			return Optional.of(decodedParent);
@@ -36,5 +33,5 @@ public class ParentTransformer {
 		}
 		return Optional.empty();
 	}
-	
+
 }

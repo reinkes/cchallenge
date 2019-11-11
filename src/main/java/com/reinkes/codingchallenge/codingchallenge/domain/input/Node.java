@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Node {
 
 	private String label;
-	private String type;
+	private NodeType type;
 	private ArrayList<Node> children;
 	private String url;
 
@@ -23,10 +23,10 @@ public class Node {
 	public void setLabel(String label) {
 		this.label = label;
 	}
-	public String getType() {
+	public NodeType getType() {
 		return type;
 	}
-	public void setType(String type) {
+	public void setType(NodeType type) {
 		this.type = type;
 	}
 	public ArrayList<Node> getChildren() {
