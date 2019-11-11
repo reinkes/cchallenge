@@ -1,4 +1,4 @@
-#Approach to the coding challenge
+# Approach to the coding challenge
 First of all I read the documentation to understand the use-cases of the service and the limits of the service.
 After the initial setup of the current spring and gradle version I started with a simple prototype to call the API 
 and read the data to an useful structure. I didn't want to run through hash-maps and settled with Jacksons JSON parser. 
