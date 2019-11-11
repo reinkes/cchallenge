@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.reinkes.codingchallenge.codingchallenge.AbstractTest;
 import com.reinkes.codingchallenge.codingchallenge.CodingchallengeApplication;
 import com.reinkes.codingchallenge.codingchallenge.domain.output.ResultVO;
 
@@ -38,7 +39,7 @@ import com.reinkes.codingchallenge.codingchallenge.domain.output.ResultVO;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = CodingchallengeApplication.class)
 @AutoConfigureMockMvc
 @SuppressWarnings("unchecked")
-public class ControllerTest {
+public class ControllerTest extends AbstractTest {
 
 	@LocalServerPort
 	private int port;
@@ -285,9 +286,5 @@ public class ControllerTest {
 		RequestBuilder requestBuilder = MockMvcRequestBuilders.request(HttpMethod.GET, url)
 				.contentType(MediaType.APPLICATION_JSON);
 		return mockMvc.perform(requestBuilder).andReturn();
-	}
-
-	private String readFile(String fileName) throws IOException {
-		return new String(Files.readAllBytes(Paths.get("src/test/resources/" + fileName)));
 	}
 }
