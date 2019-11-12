@@ -8,7 +8,7 @@ I also created a intermediate class to filter the results and a value object to 
 While the business logic increased I kept adding REST-tests to the basic test I did earlier.
 As a cleanup I added logging, exception handling and the dockerfile.
 
-Nothing was mentioned about the extensibility of the service - I tried to keep an extensible. (i.e. more filter options)
+Nothing was mentioned about the extensibility of the service - I tried to keep it extensible. (i.e. more filter options)
 I also thought about performance and memory issues but ignored them for the moment. There are several caching solutions at hand. (i.e. Caching the external API-Response for a few minutes, caching our own responses)
 There are few options to reduce the memory-optimization of the application but in many cases it trades of with the maintainability.
 Adding Swagger to Spring Boot was basically just a dependency - but I stopped after including it (I didn't add any annotations to describe the service better)
